@@ -1118,6 +1118,17 @@ html[data-lang="gu"] .drawer a { font-family: 'Noto Serif Gujarati', serif; }
 }
 .fab-top.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
 
+/* toast */
+.toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); z-index: 400;
+  transform: translate(-50%, 12px); opacity: 0; pointer-events: none;
+  background: rgba(13,8,48,0.95); color: var(--gold); border: 1px solid rgba(212,160,23,0.4);
+  padding: 10px 18px; border-radius: 10px; font-size: 0.9rem; letter-spacing: 0.02em;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: opacity .25s, transform .25s; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
 /* ── glossary ── */
 .gloss {
   border-bottom: 1px dashed rgba(212,160,23,0.55);
@@ -1184,6 +1195,7 @@ html[data-lang="gu"] .drawer a { font-family: 'Noto Serif Gujarati', serif; }
   </a>
   <button class="tb-btn" id="fontDown" aria-label="Smaller text" style="font-size:14px;">A−</button>
   <button class="tb-btn" id="fontUp" aria-label="Larger text">A+</button>
+  <button class="tb-btn" id="shareBtn" aria-label="Share this guide" style="font-size:16px;">⤴</button>
   <div class="lang-seg" role="group" aria-label="Language">
     <button id="langEn" class="active">EN</button>
     <button id="langGu" class="gu-label">ગુજરાતી</button>
@@ -1199,6 +1211,7 @@ html[data-lang="gu"] .drawer a { font-family: 'Noto Serif Gujarati', serif; }
 </nav>
 
 <button class="fab-top" id="fabTop" aria-label="Back to top">↑</button>
+<div class="toast" id="toast"></div>
 
 <div id="tree-en" lang="en">
 
@@ -4601,6 +4614,37 @@ function applyScale() {
 }
 $('#fontUp').addEventListener('click', () => { fscale = Math.min(1.45, +(fscale + 0.1).toFixed(2)); applyScale(); });
 $('#fontDown').addEventListener('click', () => { fscale = Math.max(0.85, +(fscale - 0.1).toFixed(2)); applyScale(); });
+
+/* ── toast ── */
+let toastTimer = null;
+function showToast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ── share ── */
+$('#shareBtn').addEventListener('click', async () => {
+  const isGu = document.documentElement.getAttribute('data-lang') === 'gu';
+  const title = 'Sanātana Dharma — સનાતન ધર્મ';
+  const text = isGu
+    ? 'સનાતન ધર્મ વિશે આ માર્ગદર્શિકા જુઓ:'
+    : 'Check out this guide to Sanātana Dharma:';
+  const url = location.href;
+  if (navigator.share) {
+    try { await navigator.share({ title, text, url }); }
+    catch (e) { /* user cancelled or share failed silently */ }
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast(isGu ? 'લિંક કૉપી થઈ ગઈ' : 'Link copied to clipboard');
+  } catch (e) {
+    showToast(isGu ? 'લિંક કૉપી કરી શકાઈ નથી' : 'Could not copy link');
+  }
+});
 
 /* ── drawer / toc ── */
 function activeTree() { return document.documentElement.getAttribute('data-lang') === 'gu' ? $('#tree-gu') : $('#tree-en'); }
