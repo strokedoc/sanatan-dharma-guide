@@ -74,6 +74,14 @@ body.reading #nav { display: none; }
 /* content panes — the reading measure never exceeds a comfortable line length */
 .pane { padding: 18px 26px 100px; }
 
+/* On phones the shell covers the whole viewport, so the page background is
+   never meant to be seen. Match it to the tab bar anyway: if any browser ever
+   sizes the viewport such that a seam appears under the bar, it blends
+   instead of showing as a sandy dead strip. */
+@media (max-width: 480px) {
+  html, body { background: var(--tabbar); }
+}
+
 /* large phones & small tablets: widen the column, keep the bottom bar */
 @media (min-width: 481px) and (max-width: 767px) {
   html, body { background: radial-gradient(ellipse at 50% 0%, var(--page-1), var(--page-3)); }
