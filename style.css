@@ -357,7 +357,8 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 .pager {
   flex: none; display: flex; align-items: center; justify-content: space-between;
   gap: 12px; background: var(--card);
-  margin: 0 28px; padding: 12px 0 20px;
+  margin: 0 28px;
+  padding: 12px 0 max(20px, calc(env(safe-area-inset-bottom) - 10px));
 }
 .pager .pg {
   background: none; border: none; padding: 0; cursor: pointer;
@@ -378,7 +379,11 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 .tabbar {
   flex: none; background: var(--tabbar);
   padding: 11px 20px 10px;
-  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  /* Standalone reports a 34px bottom inset; reserving all of it leaves that
+     much empty bar under the labels (bar h79 on device). The home-indicator
+     pill is ~5px tall sitting ~8px up, so it needs far less clearance.
+     Safari reports 0 here, so this stays at 10px there. */
+  padding-bottom: max(10px, calc(env(safe-area-inset-bottom) - 20px));
   display: flex; justify-content: space-between;
   box-shadow: 0 -1px 0 rgba(255,255,255,.6) inset, 0 -6px 18px rgba(120,105,80,.1);
 }
