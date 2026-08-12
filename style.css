@@ -71,6 +71,17 @@ html, body { overflow: hidden; }
 #stage { order: 1; }
 body.reading #nav { display: none; }
 
+/* Pin the bar to the viewport itself rather than letting it ride as a flex
+   child of the shell — matching strokedoc/stroke-guide's .quickbar, which
+   seats correctly on this hardware. iOS treats a fixed bottom:0 element
+   differently from a box inside a fixed top:0/bottom:0 container. */
+@media (max-width: 767px) {
+  #nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    max-width: 480px; margin: 0 auto;
+  }
+}
+
 /* content panes — the reading measure never exceeds a comfortable line length */
 .pane { padding: 18px 26px 100px; }
 
@@ -146,21 +157,27 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 
 /* ── HOME ── */
 .home-hero {
-  flex: none; position: relative; overflow: hidden; padding-bottom: 0;
-  background: linear-gradient(168deg,#DAD4C8 0%,#C9C1B2 62%,#C4BBAA 100%);
-  box-shadow: inset 0 -8px 18px rgba(120,105,80,.08);
+  flex: none; position: relative; z-index: 3; overflow: hidden;
+  padding-bottom: 42px;                 /* empty sand for the fade-out zone */
+  background: linear-gradient(168deg,#DAD4C8 0%,#C9C1B2 68%,#C4BBAA 100%);
+  /* the hero's own lower edge dissolves, so content sliding underneath fades
+     out instead of being cut off at a container boundary */
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 46px), transparent 100%);
+          mask-image: linear-gradient(180deg, #000 calc(100% - 46px), transparent 100%);
 }
 /* The hero now ends on flat sand (#C4BBAA) and the scroll column picks that
    exact tone up and carries it down past the description before turning to
    cream. Backgrounds on a scroll container stay put while content moves, so
    this reads as one continuous wash rather than a seam. */
 .home-hero + .scroll {
+  margin-top: -42px;                    /* slide up behind the hero's fade */
   background: linear-gradient(180deg,
     #C4BBAA 0,
-    #C4BBAA 20px,     /* hold the sand to the top of the description */
-    #D9D2C5 60px,     /* lighten through its first lines */
-    var(--card) 104px);
+    #C4BBAA 16px,     /* the mandala's outer ring ends here */
+    #D9D2C5 52px,
+    var(--card) 96px);
 }
+.home-hero + .scroll .home-body { padding-top: 50px; }
 .home-hero .top-row { position:relative;z-index:3;padding:max(16px, env(safe-area-inset-top)) 26px 0;display:flex;align-items:center;justify-content:space-between; }
 
 /* ── the turning mandala behind the ॐ ── */
@@ -196,7 +213,7 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
    so pure metric centring lands at ~4px and still reads high. 10.5px is an
    optical correction, confirmed by eye — don't "fix" it back to the math. */
 .home-hero .om-disc span { font-family:'Noto Serif Devanagari',serif;font-size:54px;line-height:1;color:var(--gold);transform:translateY(10.5px); }
-.home-hero .titles { position:relative;z-index:3;text-align:center;padding:10px 26px 30px; }
+.home-hero .titles { position:relative;z-index:3;text-align:center;padding:10px 26px 12px; }
 .home-hero .titles .t1 { font-family:'Cinzel',serif;font-size:24px;letter-spacing:.12em;font-weight:600;color:var(--ink); }
 .home-hero .titles .t2 { font-size:14.5px;font-style:italic;color:var(--ink-soft);margin-top:3px;font-family:'Cormorant Garamond',serif; }
 /* now the first thing in the scrolling column, on cream */
@@ -349,7 +366,7 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 .pager {
   flex: none; display: flex; align-items: center; justify-content: space-between;
   gap: 12px; background: var(--card);
-  margin: 0 28px; padding: 12px 0 max(16px, calc(env(safe-area-inset-bottom) - 10px));
+  margin: 0 28px; padding: 12px 0 20px;
 }
 .pager .pg {
   background: none; border: none; padding: 0; cursor: pointer;
@@ -369,7 +386,8 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 /* ── TAB BAR ── */
 .tabbar {
   flex: none; background: var(--tabbar);
-  padding: 10px 20px max(12px, calc(env(safe-area-inset-bottom) - 14px));
+  padding: 11px 20px 10px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
   display: flex; justify-content: space-between;
   box-shadow: 0 -1px 0 rgba(255,255,255,.6) inset, 0 -6px 18px rgba(120,105,80,.1);
 }
