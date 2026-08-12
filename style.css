@@ -182,6 +182,11 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 .home-hero .mandala {
   width: 360px; height: 360px; opacity: .30;
   animation: sdSpin 150s linear infinite;
+  /* Its outer ring runs past the top of the viewport and used to be sliced by
+     a hard edge (previously hidden under a translucent status bar). Fading the
+     rim out radially means there is nothing solid left to cut. */
+  -webkit-mask-image: radial-gradient(circle, #000 52%, rgba(0,0,0,.55) 74%, transparent 93%);
+          mask-image: radial-gradient(circle, #000 52%, rgba(0,0,0,.55) 74%, transparent 93%);
 }
 .home-hero .halo {
   width: 230px; height: 230px; border-radius: 50%;

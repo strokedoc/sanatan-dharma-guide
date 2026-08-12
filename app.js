@@ -648,7 +648,7 @@ function showLayoutProbe() {
     'GAP BELOW    ' + Math.round(innerHeight - bar.getBoundingClientRect().bottom) + 'px',
     'sw           ' + (navigator.serviceWorker && navigator.serviceWorker.controller
                        ? 'controlled' : 'none'),
-    'css build    v18'
+    'css build    v19'
   ].join('\n');
   box.onclick = () => box.remove();
   document.body.appendChild(box);
