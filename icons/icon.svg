@@ -1,17 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1A1060"/>
-      <stop offset="1" stop-color="#0D0830"/>
+    <linearGradient id="sand" x1="0" y1="0" x2="0.45" y2="1">
+      <stop offset="0" stop-color="#DED8CC"/>
+      <stop offset="0.55" stop-color="#CDC5B6"/>
+      <stop offset="1" stop-color="#BEB4A2"/>
     </linearGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#F5C842"/>
-      <stop offset="0.5" stop-color="#E8630A"/>
-      <stop offset="1" stop-color="#D4A017"/>
+    <linearGradient id="stone" x1="0.18" y1="0" x2="0.82" y2="1">
+      <stop offset="0" stop-color="#F4EFE4"/>
+      <stop offset="1" stop-color="#CFC6B4"/>
     </linearGradient>
+    <!-- the disc covers everything inside r=140 (offset .64), so the glow has
+         to still be strong there or the halo is invisible -->
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#D69A2E" stop-opacity="0.30"/>
+      <stop offset="0.64" stop-color="#D69A2E" stop-opacity="0.26"/>
+      <stop offset="0.80" stop-color="#D69A2E" stop-opacity="0.11"/>
+      <stop offset="1" stop-color="#D69A2E" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <!-- blurring the rim arcs is what dissolves their end-points, so the
+         highlight and shade meet instead of stopping dead at top and bottom -->
+    <filter id="blurArc" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <clipPath id="discClip"><circle cx="256" cy="256" r="140"/></clipPath>
   </defs>
-  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
-  <circle cx="256" cy="256" r="190" fill="none" stroke="#D4A017" stroke-opacity="0.25" stroke-width="6"/>
-  <circle cx="256" cy="256" r="160" fill="none" stroke="#D4A017" stroke-opacity="0.15" stroke-width="3"/>
-  <text x="256" y="363" font-family="Noto Serif Devanagari, Arial Unicode MS, sans-serif" font-size="240" text-anchor="middle" fill="url(#gold)">ॐ</text>
+
+  <!-- full bleed: iOS renders transparent corners black, and both
+       platforms apply their own corner mask -->
+  <rect width="512" height="512" fill="url(#sand)"/>
+
+  <!-- warm glow behind the stone -->
+  <circle cx="256" cy="256" r="218" fill="url(#glow)"/>
+
+  <!-- the stone disc: cast shadow, body, inset highlight and shade -->
+  <circle cx="256" cy="268" r="140" fill="#7A6950" opacity="0.28" filter="url(#soft)"/>
+  <circle cx="256" cy="256" r="140" fill="url(#stone)"/>
+  <g clip-path="url(#discClip)" filter="url(#blurArc)">
+    <circle cx="256" cy="256" r="133" fill="none" stroke="#FFFFFF" stroke-opacity="0.95"
+            stroke-width="9" stroke-linecap="round"
+            stroke-dasharray="250 600" transform="rotate(-145 256 256)"/>
+    <circle cx="256" cy="256" r="133" fill="none" stroke="#786950" stroke-opacity="0.38"
+            stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="250 600" transform="rotate(35 256 256)"/>
+  </g>
+
+  <text x="256" y="351" text-anchor="middle" fill="#B0801F"
+        font-family="Noto Serif Devanagari, Devanagari Sangam MN, ITF Devanagari, serif"
+        font-size="200">ॐ</text>
 </svg>

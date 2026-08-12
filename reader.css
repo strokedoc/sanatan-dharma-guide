@@ -1,0 +1,173 @@
+/* ═══════════ READER — tokens lifted verbatim from deploy/app.js ═══════════
+   card      #E7E2D8, radius 12px, pad 14px 16px, shadow: inset 0 1px 0 rgba(255,255,255,.8)
+   quote     linear-gradient(160deg,#E4DED2,#D6CEBE), radius 14px, pad 20px,
+             inset 2px 3px 6px rgba(255,255,255,.6), inset -2px -3px 8px rgba(120,105,80,.28)
+   prose     19px Cormorant, line-height 1.75, #3A362E, margin 0 0 18px
+   meta      10.5–12px Work Sans, letter-spacing .16em, rgba(46,43,38,.45–.5)
+   Deploy uses NO drop shadows, NO edge bars, NO filled buttons in content.
+   ═══════════════════════════════════════════════════════════════════════ */
+.reader-content {
+  color: #3A362E;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  line-height: 1.75;
+  padding: 22px 28px 8px;
+}
+.reader-content * { box-sizing: border-box; }
+.reader-content p { margin: 0 0 18px; }
+.reader-content p:last-child { margin-bottom: 0; }
+.reader-content strong { color: var(--gold-deep); font-weight: 600; }
+.reader-content ul { margin: 14px 0 0 19px; padding: 0; }
+.reader-content li { margin-bottom: 9px; line-height: 1.7; }
+.reader-content li strong { color: var(--gold-deep); }
+.reader-content .pill {
+  display: inline-block; color: var(--gold-deep);
+  font-style: italic; white-space: nowrap;
+}
+
+/* a quiet section label */
+.reader-content .s-head {
+  font-family: 'Cinzel', serif; font-size: 11.5px; letter-spacing: .2em;
+  text-transform: uppercase; color: rgba(46,43,38,.5); margin: 0 0 16px;
+}
+
+/* loose prose — sits directly on the page, never in a card */
+.reader-content .s-prose { margin-bottom: 18px; }
+
+/* ══ SLAB — deploy's card, one hairline highlight, nothing more ══ */
+.reader-content .slab {
+  background: #E7E2D8;
+  border-radius: 14px;
+  padding: 20px 20px 22px;
+  margin: 0 0 12px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;
+}
+.reader-content .s-icon { font-size: 1.25em; line-height: 1; margin-bottom: 8px; }
+.reader-content .s-eyebrow {
+  font: 400 10.5px 'Work Sans', sans-serif; letter-spacing: .16em;
+  text-transform: uppercase; color: rgba(46,43,38,.45); margin-bottom: 7px;
+}
+/* deploy styles card names in the inherited serif at 600 — Cinzel is reserved
+   for chapter and screen headings, and reads shouty at body scale */
+.reader-content .s-title {
+  font-size: 1.15em; font-weight: 600;
+  line-height: 1.3; color: var(--ink); margin-bottom: 2px;
+}
+.reader-content.lang-gu .s-title { font-size: 1.02em; }
+.reader-content .s-deva {
+  font-family: 'Noto Serif Devanagari', serif; font-size: .8em;
+  color: var(--gold); letter-spacing: .06em; margin-bottom: 12px;
+}
+.reader-content .s-body { font-size: .92em; line-height: 1.75; color: #3A362E; }
+.reader-content .s-body > :first-child { margin-top: 0; }
+.reader-content .s-body p { margin-bottom: 13px; }
+
+/* tone lives in the small text only — never a bar or a fill */
+.reader-content .slab.tone-teal    .s-deva { color: var(--teal); }
+.reader-content .slab.tone-rose    .s-deva { color: var(--rose); }
+.reader-content .slab.tone-forest  .s-deva { color: var(--forest); }
+.reader-content .slab.tone-violet  .s-deva { color: var(--violet); }
+.reader-content .slab.tone-saffron .s-deva { color: var(--saffron); }
+
+/* tags — letterspaced micro-caps, no pill fill */
+.reader-content .slab-tags {
+  display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 14px;
+  padding-top: 12px; border-top: 1px solid rgba(46,43,38,.09);
+}
+.reader-content .slab-tag {
+  font: 400 9.5px 'Work Sans', sans-serif; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(46,43,38,.45);
+}
+.reader-content .slab-tag.saffron { color: rgba(196,98,10,.75); }
+.reader-content .slab-tag.teal    { color: rgba(28,122,114,.75); }
+.reader-content .slab-tag.rose    { color: rgba(168,68,106,.75); }
+.reader-content .slab-tag.green   { color: rgba(74,122,42,.75); }
+
+/* ══ QUOTE — pressed into the stone (deploy's exact recipe) ══ */
+.reader-content .slab-quote {
+  background: linear-gradient(160deg, #E4DED2, #D6CEBE);
+  border-radius: 14px; padding: 20px; margin: 0 0 20px; text-align: center;
+  box-shadow: inset 2px 3px 6px rgba(255,255,255,.6),
+              inset -2px -3px 8px rgba(120,105,80,.28);
+}
+.reader-content .slab-quote .q-text {
+  font-size: .9em; font-style: italic; line-height: 1.6; color: rgba(46,43,38,.65);
+}
+.reader-content .slab-quote .q-cite {
+  font: 400 10.5px 'Work Sans', sans-serif; letter-spacing: .16em;
+  text-transform: uppercase; color: rgba(46,43,38,.45); margin-top: 8px;
+}
+
+/* ══ NOTE — same pressed treatment, left aligned ══ */
+.reader-content .slab-note {
+  background: linear-gradient(160deg, #E4DED2, #D6CEBE);
+  border-radius: 14px; padding: 18px 20px; margin: 0 0 16px;
+  box-shadow: inset 2px 3px 6px rgba(255,255,255,.6),
+              inset -2px -3px 8px rgba(120,105,80,.28);
+}
+.reader-content .slab-note .n-title {
+  font: 400 10.5px 'Work Sans', sans-serif; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--gold-deep); margin-bottom: 9px;
+}
+.reader-content .slab-note .n-body { font-size: .9em; line-height: 1.72; color: rgba(46,43,38,.72); }
+.reader-content .slab-note .n-body p:last-child { margin-bottom: 0; }
+
+/* ══ MINI CARDS — deploy's card row, name left / number right ══ */
+.reader-content .slab-cards { display: flex; flex-direction: column; }
+.reader-content .mini-card {
+  background: #E7E2D8; border-radius: 12px; padding: 14px 16px; margin: 0 0 10px;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;
+}
+.reader-content .mini-card .m-body { flex: 1; min-width: 0; }
+.reader-content .mini-card .m-name { font-size: 1.05em; font-weight: 600; color: var(--ink); line-height: 1.25; }
+.reader-content .mini-card .m-note {
+  font: 400 12px 'Work Sans', sans-serif; color: rgba(46,43,38,.5); margin-top: 2px; line-height: 1.45;
+}
+.reader-content .mini-card .m-num {
+  font-family: 'Cinzel', serif; font-size: 1em; color: var(--gold); flex: none;
+}
+
+/* ── Gujarati ── */
+.reader-content.lang-gu, .reader-content.lang-gu * { font-family: 'Noto Serif Gujarati', 'Cormorant Garamond', serif; }
+.reader-content.lang-gu :is(.s-deva, .m-num) { font-family: 'Noto Serif Devanagari', serif; }
+
+/* ── glossary ── */
+.reader-content .gloss { border-bottom: 1px dashed rgba(176,128,31,.5); cursor: help; -webkit-tap-highlight-color: transparent; }
+.gloss-pop {
+  position: fixed; z-index: 500; max-width: min(300px, 84vw);
+  background: #EFEBE2; border: 1px solid rgba(46,43,38,.14); border-radius: 14px;
+  padding: 14px 16px; box-shadow: 0 10px 34px rgba(120,105,80,.26);
+  font: 400 13.5px/1.6 'Work Sans', sans-serif; color: rgba(46,43,38,.75);
+  animation: popIn .18s ease-out;
+}
+.gloss-pop b {
+  color: var(--gold-deep); display: block; margin-bottom: 4px;
+  font: 600 10.5px 'Work Sans', sans-serif; letter-spacing: .16em; text-transform: uppercase;
+}
+@keyframes popIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* ── path quiz ── */
+.reader-content .path-quiz { margin-top: 4px; }
+.reader-content .quiz-q { font-size: .95em; color: var(--ink); margin-bottom: 14px; line-height: 1.5; }
+.reader-content .quiz-opts { display: grid; gap: 8px; }
+.reader-content .quiz-opts button {
+  text-align: left; padding: 13px 15px; border-radius: 12px; cursor: pointer;
+  background: #EFEBE2; color: #3A362E; border: none;
+  box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;
+  font-family: 'Cormorant Garamond', Georgia, serif; font-size: .92em; line-height: 1.4;
+  transition: background .18s;
+}
+.reader-content.lang-gu .quiz-opts button { font-family: 'Noto Serif Gujarati', serif; }
+.reader-content .quiz-opts button:hover { background: #F4F1EA; }
+.reader-content .quiz-meta {
+  margin-top: 13px; font: 400 10.5px 'Work Sans', sans-serif;
+  letter-spacing: .16em; text-transform: uppercase; color: rgba(46,43,38,.45);
+}
+.reader-content .quiz-result h4 {
+  font-size: 1.15em; font-weight: 600; color: var(--ink); margin-bottom: 8px;
+}
+.reader-content .quiz-result p { font-size: .92em; color: #3A362E; line-height: 1.72; }
+.reader-content .quiz-restart {
+  margin-top: 16px; background: none; border: none; padding: 0;
+  color: var(--gold); font: 400 12px 'Work Sans', sans-serif; cursor: pointer;
+}

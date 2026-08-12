@@ -1,10 +1,17 @@
 /* Sanatana Dharma PWA service worker */
-const VERSION = 'sd-v1';
+const VERSION = 'sd-v5';
 const PRECACHE = [
   './index.html',
+  './style.css',
+  './reader.css',
+  './data.js',
+  './hero.js',
+  './extra.js',
+  './app.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './icons/maskable-512.png'
 ];
 
 self.addEventListener('install', e => {

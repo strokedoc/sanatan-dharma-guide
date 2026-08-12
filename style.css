@@ -1,0 +1,448 @@
+/* ═══════════════ SHELL — cream/gold app design ═══════════════ */
+:root {
+  --page-1: #DAD4C8;
+  --page-2: #C9C1B2;
+  --page-3: #BCB2A0;
+  --card: #EFEBE2;
+  --card-soft: #E4DED2;
+  --card-mid: #D6CEBE;
+  --tabbar: #DFDACE;
+  --ink: #2E2B26;
+  --ink-soft: rgba(46,43,38,.55);
+  --ink-faint: rgba(46,43,38,.45);
+  --line: rgba(46,43,38,.14);
+  --gold: #B0801F;
+  --gold-deep: #8A6A2A;
+  --amber-1: #E9A227;
+  --amber-2: #C97C15;
+  --rose: #A8446A;
+  --rose-bg: rgba(168,68,106,.09);
+  --teal: #1C7A72;
+  --teal-bg: rgba(28,122,114,.09);
+  --forest: #4A7A2A;
+  --forest-bg: rgba(74,122,42,.09);
+  --violet: #6858B8;
+  --violet-bg: rgba(104,88,184,.09);
+  --saffron: #C4620A;
+  --saffron-bg: rgba(196,98,10,.09);
+  font-size: calc(100% * var(--fscale, 1));
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  background: var(--page-2);
+  font-family: 'Work Sans', system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+button, input { font-family: inherit; }
+a { color: var(--gold); text-decoration: none; }
+
+@keyframes sdSpin { from{transform:translate(-50%,-50%) rotate(0)} to{transform:translate(-50%,-50%) rotate(360deg)} }
+@keyframes sdSpinR { from{transform:translate(-50%,-50%) rotate(360deg)} to{transform:translate(-50%,-50%) rotate(0)} }
+@keyframes sdBreathe { 0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)} 50%{opacity:.85;transform:translate(-50%,-50%) scale(1.06)} }
+@keyframes sdFade { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+
+html, body { overflow: hidden; }
+#app-shell {
+  max-width: 480px;
+  margin: 0 auto;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--card);
+  /* deploy's #phone base: the serif is the default, Work Sans is opt-in for
+     small meta labels only. Without this, every 600-weight title lands as
+     heavy bold sans. */
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  color: var(--ink);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(44,26,14,.18);
+}
+/* phones: nav is the bottom bar (DOM order is nav-first for the desktop rail,
+   so flip it with `order` here), and it steps aside while reading */
+#nav { flex: none; order: 2; }
+#stage { order: 1; }
+body.reading #nav { display: none; }
+
+/* content panes — the reading measure never exceeds a comfortable line length */
+.pane { padding: 18px 26px 100px; }
+
+/* large phones & small tablets: widen the column, keep the bottom bar */
+@media (min-width: 481px) and (max-width: 767px) {
+  html, body { background: radial-gradient(ellipse at 50% 0%, var(--page-1), var(--page-3)); }
+  #app-shell { max-width: 600px; }
+}
+
+/* ── shared header block (library/practice/saved) ── */
+.screen-head {
+  flex: none; padding: 52px 26px 18px;
+  background: linear-gradient(170deg, var(--page-1), var(--page-2));
+  box-shadow: inset 0 -10px 20px rgba(120,105,80,.12);
+}
+.screen-head .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.screen-title { font-family: 'Cinzel', serif; font-size: 25px; font-weight: 600; letter-spacing: .08em; color: var(--ink); }
+.screen-sub { font-size: 16px; font-style: italic; color: var(--ink-soft); margin-top: 2px; font-family: 'Cormorant Garamond', serif; }
+
+.search-box {
+  margin-top: 14px; background: var(--card); border-radius: 12px; padding: 10px 14px;
+  display: flex; gap: 10px; align-items: center;
+  box-shadow: inset 1px 2px 4px rgba(120,105,80,.2);
+}
+.search-box input {
+  flex: 1; border: none; outline: none; background: transparent;
+  font: 400 14.5px 'Work Sans', sans-serif; color: var(--ink);
+}
+.search-box .ic { color: var(--ink-faint); font-size: 14px; }
+
+/* ── cards ── */
+.card {
+  background: var(--card); border-radius: 16px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.85) inset, 0 3px 12px rgba(120,105,80,.15);
+}
+.card.clickable { cursor: pointer; }
+/* the clickable cards are real <button>s (keyboard + screen-reader reachable),
+   so strip the UA button chrome and keep them laying out like the old divs */
+button.card {
+  display: block; width: 100%; margin: 0; border: none;
+  font: inherit; color: inherit; text-align: left; -webkit-appearance: none;
+}
+button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { display: flex; }
+
+/* visible keyboard focus — the app sets outline:none on the search field and
+   UA focus rings are invisible against these buttons */
+:focus-visible { outline: none; }
+.card.clickable:focus-visible,
+.tab-btn:focus-visible,
+.pips .pip:focus-visible,
+.pager .pg:focus-visible,
+.lang-toggle button:focus-visible,
+.reader-head .tools button:focus-visible,
+.reader-head .back:focus-visible,
+.quiz-opts button:focus-visible,
+.install-row button:focus-visible {
+  outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 10px;
+}
+.search-box:focus-within {
+  box-shadow: inset 1px 2px 4px rgba(120,105,80,.2), 0 0 0 2px rgba(176,128,31,.55);
+}
+.section-label {
+  font-family: 'Cinzel', serif; font-size: 11.5px; letter-spacing: .2em; color: var(--ink-soft);
+}
+
+/* ── HOME ── */
+.home-hero {
+  flex: none; position: relative; overflow: hidden; padding-bottom: 6px;
+  background: linear-gradient(168deg,#DAD4C8 0%,#C9C1B2 55%,#BCB2A0 100%);
+  box-shadow: inset 0 -18px 34px rgba(120,105,80,.2);
+}
+.home-hero .top-row { position:relative;padding:54px 26px 0;display:flex;align-items:center;justify-content:space-between; }
+
+/* ── the turning mandala behind the ॐ ── */
+.home-hero .om-wrap {
+  position: relative; width: 120px; height: 120px; margin: 16px auto 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.home-hero .mandala,
+.home-hero .halo,
+.home-hero .ring { position: absolute; top: 50%; left: 50%; pointer-events: none; }
+.home-hero .mandala {
+  width: 360px; height: 360px; opacity: .30;
+  animation: sdSpin 150s linear infinite;
+}
+.home-hero .halo {
+  width: 230px; height: 230px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(233,162,39,.30), rgba(233,162,39,.07) 45%, transparent 70%);
+  animation: sdBreathe 7s ease-in-out infinite;
+}
+.home-hero .ring {
+  width: 172px; height: 172px; border-radius: 50%;
+  border: 1px dashed rgba(176,128,31,.32);
+  animation: sdSpinR 54s linear infinite;
+}
+.home-hero .eyebrow { font:500 10.5px 'Work Sans',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint); }
+.home-hero .om-disc {
+  position:relative;z-index:1;width:120px;height:120px;border-radius:50%;
+  background:linear-gradient(160deg,#E9E3D6,#CEC5B3);
+  box-shadow:inset 2px 3px 7px rgba(255,255,255,.8),inset -3px -4px 10px rgba(120,105,80,.38),0 6px 18px rgba(120,105,80,.18);
+  display:flex;align-items:center;justify-content:center;
+}
+/* ॐ has no descender (ink box at 54px: 46px above the baseline, 1px below),
+   so pure metric centring lands at ~4px and still reads high. 10.5px is an
+   optical correction, confirmed by eye — don't "fix" it back to the math. */
+.home-hero .om-disc span { font-family:'Noto Serif Devanagari',serif;font-size:54px;line-height:1;color:var(--gold);transform:translateY(10.5px); }
+.home-hero .titles { position:relative;text-align:center;padding:14px 26px 22px; }
+.home-hero .titles .t1 { font-family:'Cinzel',serif;font-size:24px;letter-spacing:.12em;font-weight:600;color:var(--ink); }
+.home-hero .titles .t2 { font-size:14.5px;font-style:italic;color:var(--ink-soft);margin-top:3px;font-family:'Cormorant Garamond',serif; }
+.home-hero .desc { position:relative;padding:0 26px 22px;font-size:12.5px;line-height:1.7;color:var(--ink-soft);text-align:center;font-style:italic;font-family:'Cormorant Garamond',serif; }
+
+.home-body { padding: 20px 26px 100px; }
+.continue-card { padding: 19px 20px; }
+.continue-card .row1 { display:flex;align-items:baseline;justify-content:space-between; }
+.continue-card .eyebrow { font-family:'Cinzel',serif;font-size:11px;letter-spacing:.18em;color:var(--gold); }
+.continue-card .meta { font:400 11px 'Work Sans',sans-serif;color:var(--ink-faint); }
+.continue-card .title { font-size:24px;font-weight:600;line-height:1.15;margin:5px 0 3px;color:var(--ink); }
+.continue-card .deva { font-family:'Noto Serif Devanagari',serif;font-size:13px;color:var(--gold);letter-spacing:.1em; }
+.progress-track { height:4px;border-radius:3px;background:#DDD7CA;overflow:hidden;margin-top:13px; }
+.progress-fill { height:100%;background:linear-gradient(90deg,var(--amber-1),var(--amber-2)); }
+
+.verse-card {
+  margin-top: 10px; background: linear-gradient(160deg,var(--card-soft),var(--card-mid));
+  border-radius: 16px; padding: 20px; text-align: center;
+  box-shadow: inset 2px 3px 6px rgba(255,255,255,.6), inset -2px -3px 8px rgba(120,105,80,.26);
+}
+.verse-card .deva { font-family:'Noto Serif Devanagari',serif;font-size:18px;line-height:1.65;color:var(--gold-deep); }
+.verse-card .txt { font-size:15.5px;font-style:italic;color:var(--ink-soft);margin-top:7px;font-family:'Cormorant Garamond',serif; }
+.verse-card .cite { font:400 10.5px 'Work Sans',sans-serif;letter-spacing:.16em;color:var(--ink-faint);margin-top:9px; }
+
+.upcoming-card { margin-top: 18px; padding: 15px 18px; display: flex; gap: 15px; align-items: center; }
+.upcoming-card .chip {
+  flex:none;width:48px;height:48px;border-radius:12px;color:#fff;
+  background:linear-gradient(160deg,var(--amber-1),var(--amber-2));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;
+}
+.upcoming-card .chip .d { font-family:'Cinzel',serif;font-size:16px; }
+.upcoming-card .chip .m { font:500 8px 'Work Sans',sans-serif;letter-spacing:.1em;margin-top:2px; }
+.upcoming-card .body { flex:1; }
+.upcoming-card .eyebrow { font:500 10px 'Work Sans',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--gold); }
+.upcoming-card .title { font-size:19px;font-weight:600;line-height:1.2;color:var(--ink); }
+.upcoming-card .arrow { color:var(--ink-faint);font-size:15px; }
+
+.explore-grid { margin-top: 11px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.part-card { padding: 16px 15px; cursor: pointer; }
+.part-card .deva { font-family:'Noto Serif Devanagari',serif;font-size:18px;color:var(--gold); }
+.part-card .title { font-size:18px;font-weight:600;margin-top:3px;line-height:1.2;color:var(--ink); }
+.part-card .count { font:400 11px 'Work Sans',sans-serif;color:var(--ink-faint);margin-top:3px; }
+
+.install-row { margin-top: 22px; text-align: center; }
+.install-row button {
+  border: 1px solid rgba(46,43,38,.25); background: transparent; color: var(--gold-deep);
+  border-radius: 20px; padding: 9px 18px; font: 500 12px 'Work Sans', sans-serif; cursor: pointer;
+}
+
+/* ── LIBRARY / SAVED chapter rows ── */
+.chapter-list { display: flex; flex-direction: column; gap: 10px; }
+.group-label { font-family:'Cinzel',serif;font-size:11.5px;letter-spacing:.2em;color:var(--ink-soft);margin:14px 0 10px; }
+.chapter-row { padding: 14px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
+.chapter-row .num { font-family:'Cinzel',serif;font-size:14px;color:var(--gold);width:30px;flex:none; }
+.chapter-row .body { flex: 1; min-width: 0; }
+.chapter-row .title { font-size:19px;font-weight:600;line-height:1.2;color:var(--ink); }
+[data-app-lang="gu"] .chapter-row .title { font-size: 17px; }
+.chapter-row .meta { font:400 11.5px 'Work Sans',sans-serif;color:var(--ink-faint);margin-top:2px; }
+.chapter-row .mark { font-size:13px;color:var(--gold);flex:none; }
+.empty-state { text-align: center; padding: 60px 24px; }
+.empty-state .glyph { font-family:'Noto Serif Devanagari',serif;font-size:38px;color:rgba(176,128,31,.45); }
+.empty-state p { font-size:16px;font-style:italic;color:var(--ink-soft);margin-top:12px;line-height:1.5;font-family:'Cormorant Garamond',serif; }
+
+/* ── PRACTICE ── */
+.fest-row { padding: 13px 16px; display: flex; gap: 14px; align-items: center; margin-bottom: 10px; }
+.fest-row .chip {
+  flex:none;width:46px;height:46px;border-radius:12px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;line-height:1;
+  background: linear-gradient(160deg, var(--card-soft), var(--card-mid));
+  box-shadow: inset 1px 2px 4px rgba(255,255,255,.6), inset -1px -2px 5px rgba(120,105,80,.25);
+  color: var(--gold-deep);
+}
+.fest-row .chip.soon { background: linear-gradient(160deg, var(--amber-1), var(--amber-2)); color: #fff; box-shadow: 0 2px 8px rgba(201,124,21,.3); }
+.fest-row .chip .d { font-family:'Cinzel',serif;font-size:16px; }
+.fest-row .chip .m { font:500 8px 'Work Sans',sans-serif;letter-spacing:.1em;margin-top:2px; }
+.fest-row .title { font-size:19px;font-weight:600;color:var(--ink);line-height:1.2; }
+.fest-row .note { font:400 11.5px 'Work Sans',sans-serif;color:var(--ink-faint);margin-top:2px; }
+
+.yoga-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.yoga-card {
+  padding: 16px 15px; border-radius: 14px;
+  background: linear-gradient(160deg, var(--card-soft), var(--card-mid));
+  box-shadow: inset 1px 2px 5px rgba(255,255,255,.6), inset -2px -2px 6px rgba(120,105,80,.22);
+}
+.yoga-card .deva { font-family:'Noto Serif Devanagari',serif;font-size:19px;color:var(--gold-deep); }
+.yoga-card .title { font-size:18px;font-weight:600;margin-top:3px;color:var(--ink); }
+.yoga-card .note { font:400 11px 'Work Sans',sans-serif;color:var(--ink-soft);margin-top:3px;line-height:1.4; }
+
+.practice-links { display: flex; flex-direction: column; gap: 10px; }
+.practice-link { padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.practice-link .ic { font-size: 20px; color: var(--gold); flex: none; }
+.practice-link .title { font-size: 17px; font-weight: 600; color: var(--ink); }
+.practice-link .arrow { color: var(--ink-faint); margin-left: auto; }
+
+/* ── READER ── */
+.reader-view { display:flex;flex-direction:column;height:100%;background:var(--card);animation:sdFade .28s ease; }
+.reader-head {
+  flex: none; background: linear-gradient(170deg,var(--page-1),#C9C1B2);
+  padding: 52px 26px 20px; box-shadow: inset 0 -12px 22px rgba(120,105,80,.16);
+}
+.reader-head .row { display:flex;align-items:center;justify-content:space-between; }
+.reader-head .back { font-size:19px;color:rgba(46,43,38,.6);cursor:pointer;padding:4px 8px 4px 0;background:none;border:none; }
+.reader-head .tools { display:flex;gap:14px;align-items:center; }
+.reader-head .tools button {
+  font-size:15px;color:rgba(46,43,38,.6);cursor:pointer;padding:4px 6px;background:none;border:none;
+}
+.reader-head .tools button.share { font:400 12px 'Work Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase; }
+.reader-head .tools button.on { color: var(--amber-2); }
+.reader-head .eyebrow { font-family:'Cinzel',serif;font-size:11.5px;letter-spacing:.2em;color:rgba(46,43,38,.55);margin-top:14px; }
+.reader-head .title { font-family:'Cinzel',serif;font-size:29px;font-weight:600;line-height:1.18;margin-top:5px;color:var(--ink); }
+[data-app-lang="gu"] .reader-head .title { font-family:'Noto Serif Gujarati',serif;font-size:24px; }
+.reader-head .deva { font-family:'Noto Serif Devanagari',serif;font-size:15px;color:var(--gold);letter-spacing:.1em;margin-top:4px; }
+.reader-head .deva .gloss-sub {
+  display:block;font:400 11.5px 'Work Sans',sans-serif;letter-spacing:.1em;
+  color:rgba(46,43,38,.45);margin-top:3px;text-transform:uppercase;
+}
+[data-app-lang="gu"] .reader-head .deva .gloss-sub { font-family:'Noto Serif Gujarati',sans-serif;text-transform:none;letter-spacing:.02em;font-size:12.5px; }
+.reader-accent { flex:none;height:4px;background:linear-gradient(90deg,var(--amber-1),var(--amber-2) 40%,transparent);opacity:.75; }
+
+/* ── subchapter rail: thin dashes, in deploy's 3px progress-bar language ── */
+.pips {
+  flex: none; display: flex; gap: 4px; align-items: center;
+  padding: 14px 28px 2px;
+}
+.pips .pip {
+  flex: 1; height: 3px; min-width: 0; padding: 0;
+  border: none; border-radius: 2px; cursor: pointer;
+  background: #DDD7CA; font-size: 0; color: transparent;
+  transition: background .2s;
+}
+.pips .pip.done { background: rgba(176,128,31,.45); }
+.pips .pip.on { background: var(--amber-2); }
+
+/* ── reader footer: deploy's chapter progress + reading time ── */
+.reader-foot {
+  flex: none; display: flex; align-items: center; gap: 14px;
+  background: var(--card); margin: 0 28px;
+  border-top: 1px solid rgba(46,43,38,.12); padding: 14px 0 0;
+}
+.reader-foot .track { flex: 1; height: 3px; border-radius: 2px; background: #DDD7CA; overflow: hidden; }
+.reader-foot .fill { height: 100%; background: var(--amber-2); }
+.reader-foot .label { font: 400 11px 'Work Sans', sans-serif; color: rgba(46,43,38,.5); }
+[data-app-lang="gu"] .reader-foot .label { font-family: 'Noto Serif Gujarati', sans-serif; }
+
+/* ── bottom pager: deploy's reader-nav hairline, pinned instead of inline ── */
+.pager {
+  flex: none; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; background: var(--card);
+  margin: 0 28px; padding: 12px 0 calc(22px + env(safe-area-inset-bottom));
+}
+.pager .pg {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font: 400 12px 'Work Sans', sans-serif;
+  max-width: 42%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pager .pg.prev { color: rgba(46,43,38,.5); text-align: left; }
+.pager .pg.prev.hide { visibility: hidden; }
+.pager .pg.next { color: var(--gold); text-align: right; }
+.pager .pg:active { opacity: .55; }
+.pager .pg-count {
+  flex: none; font: 400 10.5px 'Work Sans', sans-serif;
+  letter-spacing: .16em; color: rgba(46,43,38,.4);
+}
+[data-app-lang="gu"] .pager .pg { font-family: 'Noto Serif Gujarati', sans-serif; }
+
+/* ── TAB BAR ── */
+.tabbar {
+  flex: none; background: var(--tabbar); padding: 11px 20px calc(14px + env(safe-area-inset-bottom));
+  display: flex; justify-content: space-between;
+  box-shadow: 0 -1px 0 rgba(255,255,255,.6) inset, 0 -6px 18px rgba(120,105,80,.1);
+}
+.tab-btn { display:flex;flex-direction:column;align-items:center;gap:5px;width:66px;cursor:pointer;background:none;border:none; }
+.tab-btn .ic { font-size:17px;line-height:1;color:var(--ink-faint); }
+.tab-btn .ic.om { font-family:'Noto Serif Devanagari',serif; }
+.tab-btn .lbl { font-family:'Work Sans',sans-serif;font-size:9.5px;font-weight:400;color:var(--ink-faint); }
+.tab-btn.active .ic { color: var(--gold); }
+.tab-btn.active .lbl { font-weight:500;color:var(--gold-deep); }
+
+/* toast */
+.toast {
+  position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); z-index: 400;
+  transform: translate(-50%, 12px); opacity: 0; pointer-events: none;
+  background: var(--ink); color: #EFEBE2; padding: 10px 18px; border-radius: 10px;
+  font: 400 13px 'Work Sans', sans-serif; letter-spacing: .02em; white-space: nowrap;
+  transition: opacity .25s, transform .25s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero .mandala, .home-hero .halo, .home-hero .ring { animation: none !important; }
+}
+
+/* ══════ TABLET / DESKTOP: nav becomes a persistent side rail ══════ */
+@media (min-width: 768px) {
+  html, body { background: radial-gradient(ellipse at 50% 0%, var(--page-1), var(--page-3)); }
+  #app-shell {
+    max-width: 1180px;
+    height: 100vh; height: 100dvh;
+    flex-direction: row;
+    border-radius: 0;
+  }
+  /* the rail */
+  #nav { display: block !important; flex: none; width: 232px; order: 0; }
+  .tabbar {
+    height: 100%; flex-direction: column; justify-content: flex-start;
+    gap: 4px; padding: 30px 16px;
+    background: linear-gradient(170deg, var(--page-1), var(--page-2));
+    box-shadow: inset -12px 0 22px rgba(120,105,80,.10);
+  }
+  .tabbar::before {
+    content: 'ॐ';
+    font-family: 'Noto Serif Devanagari', serif; font-size: 30px; color: var(--gold);
+    text-align: center; display: block; margin: 4px 0 26px; opacity: .85;
+  }
+  .tab-btn {
+    width: 100%; flex-direction: row; justify-content: flex-start; gap: 14px;
+    padding: 12px 14px; border-radius: 12px; transition: background .18s;
+  }
+  .tab-btn:hover { background: rgba(255,255,255,.4); }
+  .tab-btn.active { background: rgba(255,255,255,.62); }
+  .tab-btn .ic { font-size: 16px; width: 20px; text-align: center; }
+  .tab-btn .lbl { font-size: 13px; letter-spacing: .04em; }
+
+  #stage { flex: 1; min-width: 0; background: var(--card); }
+
+  /* centre every screen's content on a readable measure */
+  .pane, .home-body { max-width: 760px; margin: 0 auto; padding-bottom: 56px; }
+  .reader-content, .pips, .pager, .reader-foot { max-width: 720px; margin-left: auto; margin-right: auto; }
+  .pager { margin-bottom: 0; padding-bottom: 22px; }
+  .screen-head, .reader-head, .home-hero { padding-left: 0; padding-right: 0; }
+  .screen-head > *, .reader-head > * { max-width: 760px; margin-left: auto; margin-right: auto; }
+  .screen-head { padding-top: 40px; }
+  .reader-head { padding-top: 40px; }
+  .home-hero .top-row, .home-hero .titles, .home-hero .desc { max-width: 760px; margin-left: auto; margin-right: auto; }
+  .home-hero .top-row { padding-top: 34px; }
+
+  /* wider screens can afford more columns */
+  .explore-grid { grid-template-columns: repeat(4, 1fr); }
+  .chapter-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .reader-content .slab-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+  .reader-content .mini-card { margin-bottom: 10px; }
+}
+
+/* very wide: keep the reading column honest, let the rail breathe */
+@media (min-width: 1280px) {
+  #app-shell { max-width: 1320px; }
+  #nav { width: 260px; }
+}
+
+#stage { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
+.scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.scroll::-webkit-scrollbar { width: 0; height: 0; }
+
+[data-app-lang="gu"] #app-shell { font-family: 'Noto Serif Gujarati', 'Cormorant Garamond', serif; }
+.font-cinzel { font-family: 'Cinzel', serif; }
+.font-deva { font-family: 'Noto Serif Devanagari', serif; }
+.font-serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+[data-app-lang="gu"] .font-serif,
+[data-app-lang="gu"] .gu-serif { font-family: 'Noto Serif Gujarati', 'Cormorant Garamond', serif; }
+
+/* ── lang toggle ── */
+.lang-toggle {
+  display: flex; gap: 4px; align-items: center;
+  border: 1px solid rgba(46,43,38,.22); border-radius: 20px; padding: 3px;
+  background: rgba(255,255,255,.35);
+}
+.lang-toggle button {
+  padding: 4px 11px; border-radius: 16px; border: none; cursor: pointer;
+  font-weight: 500; letter-spacing: .06em; background: transparent; color: var(--ink-soft);
+  font-family: 'Work Sans', sans-serif; font-size: 10px;
+}
+.lang-toggle button.gu { font-family: 'Noto Serif Gujarati', serif; font-size: 11px; }
+.lang-toggle button.on { background: var(--ink); color: #EFEBE2; }
