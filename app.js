@@ -119,10 +119,11 @@ function renderHome() {
       <div class="t1">${t('SANĀTANA DHARMA','સનાતન ધર્મ')}</div>
       <div class="t2">${t(HERO.en_sub, HERO.gu_sub)}</div>
     </div>
-    <div class="desc">${t(HERO.en_desc, HERO.gu_desc)}</div>
   </div>
   <div class="scroll">
     <div class="home-body">
+      <!-- the intro scrolls away with the content; only the mark and title pin -->
+      <p class="home-desc">${t(HERO.en_desc, HERO.gu_desc)}</p>
       <button type="button" class="card clickable continue-card" onclick="openReader('${cur.id}')">
         <div class="row1">
           <div class="eyebrow">${t('CONTINUE','આગળ વાંચો')}</div>

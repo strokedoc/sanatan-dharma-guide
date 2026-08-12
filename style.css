@@ -146,15 +146,21 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 
 /* ── HOME ── */
 .home-hero {
-  flex: none; position: relative; overflow: hidden; padding-bottom: 6px;
-  background: linear-gradient(168deg,#DAD4C8 0%,#C9C1B2 55%,#BCB2A0 100%);
-  box-shadow: inset 0 -18px 34px rgba(120,105,80,.2);
+  flex: none; position: relative; overflow: hidden; padding-bottom: 0;
+  background: linear-gradient(168deg,#DAD4C8 0%,#C9C1B2 62%,#C4BBAA 100%);
+  box-shadow: inset 0 -8px 18px rgba(120,105,80,.08);
 }
-.home-hero .top-row { position:relative;padding:54px 26px 0;display:flex;align-items:center;justify-content:space-between; }
+/* dissolve the sand into the cream below so the two panes read as one page */
+.home-hero::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 60px;
+  background: linear-gradient(180deg, rgba(239,235,226,0), var(--card));
+  pointer-events: none; z-index: 2;
+}
+.home-hero .top-row { position:relative;z-index:3;padding:max(16px, env(safe-area-inset-top)) 26px 0;display:flex;align-items:center;justify-content:space-between; }
 
 /* ── the turning mandala behind the ॐ ── */
 .home-hero .om-wrap {
-  position: relative; width: 120px; height: 120px; margin: 16px auto 0;
+  position: relative; z-index: 3; width: 120px; height: 120px; margin: 10px auto 0;
   display: flex; align-items: center; justify-content: center;
 }
 .home-hero .mandala,
@@ -185,10 +191,15 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
    so pure metric centring lands at ~4px and still reads high. 10.5px is an
    optical correction, confirmed by eye — don't "fix" it back to the math. */
 .home-hero .om-disc span { font-family:'Noto Serif Devanagari',serif;font-size:54px;line-height:1;color:var(--gold);transform:translateY(10.5px); }
-.home-hero .titles { position:relative;text-align:center;padding:14px 26px 22px; }
+.home-hero .titles { position:relative;z-index:3;text-align:center;padding:10px 26px 30px; }
 .home-hero .titles .t1 { font-family:'Cinzel',serif;font-size:24px;letter-spacing:.12em;font-weight:600;color:var(--ink); }
 .home-hero .titles .t2 { font-size:14.5px;font-style:italic;color:var(--ink-soft);margin-top:3px;font-family:'Cormorant Garamond',serif; }
-.home-hero .desc { position:relative;padding:0 26px 22px;font-size:12.5px;line-height:1.7;color:var(--ink-soft);text-align:center;font-style:italic;font-family:'Cormorant Garamond',serif; }
+/* now the first thing in the scrolling column, on cream */
+.home-desc {
+  margin: 0 0 20px; font-size: 15px; line-height: 1.75; color: var(--ink-soft);
+  text-align: center; font-style: italic; font-family: 'Cormorant Garamond', serif;
+}
+[data-app-lang="gu"] .home-desc { font-family: 'Noto Serif Gujarati', serif; font-size: 13.5px; }
 
 .home-body { padding: 20px 26px 100px; }
 .continue-card { padding: 19px 20px; }
@@ -333,7 +344,7 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 .pager {
   flex: none; display: flex; align-items: center; justify-content: space-between;
   gap: 12px; background: var(--card);
-  margin: 0 28px; padding: 12px 0 max(22px, env(safe-area-inset-bottom));
+  margin: 0 28px; padding: 12px 0 max(16px, calc(env(safe-area-inset-bottom) - 10px));
 }
 .pager .pg {
   background: none; border: none; padding: 0; cursor: pointer;
@@ -352,7 +363,8 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 
 /* ── TAB BAR ── */
 .tabbar {
-  flex: none; background: var(--tabbar); padding: 11px 20px max(14px, env(safe-area-inset-bottom));
+  flex: none; background: var(--tabbar);
+  padding: 10px 20px max(12px, calc(env(safe-area-inset-bottom) - 14px));
   display: flex; justify-content: space-between;
   box-shadow: 0 -1px 0 rgba(255,255,255,.6) inset, 0 -6px 18px rgba(120,105,80,.1);
 }
@@ -417,7 +429,7 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
   .screen-head > *, .reader-head > * { max-width: 760px; margin-left: auto; margin-right: auto; }
   .screen-head { padding-top: 40px; }
   .reader-head { padding-top: 40px; }
-  .home-hero .top-row, .home-hero .titles, .home-hero .desc { max-width: 760px; margin-left: auto; margin-right: auto; }
+  .home-hero .top-row, .home-hero .titles { max-width: 760px; margin-left: auto; margin-right: auto; }
   .home-hero .top-row { padding-top: 34px; }
 
   /* wider screens can afford more columns */
@@ -475,7 +487,6 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
   .home-hero .titles { padding: 6px 26px 10px; }
   .home-hero .titles .t1 { font-size: 18px; letter-spacing: .1em; }
   .home-hero .titles .t2 { font-size: 12.5px; }
-  .home-hero .desc { display: none; }          /* long intro; hero must stay short */
 
   .screen-head { padding-top: 16px; padding-bottom: 12px; }
   .screen-head .search-box { margin-top: 10px; }
