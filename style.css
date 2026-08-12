@@ -44,18 +44,22 @@ a { color: var(--gold); text-decoration: none; }
 @keyframes sdFade { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
 
 html, body { overflow: hidden; }
+/* Pinned with fixed+inset rather than a vh/dvh height. Any viewport unit can
+   disagree with the actually-visible area on a phone — 100vh is the LARGE
+   viewport on iOS, dvh is unsupported on older browsers, and either way a
+   mismatch leaves the shell short and the body background showing as a dead
+   strip under the tab bar. inset:0 cannot disagree. */
 #app-shell {
+  position: fixed;
+  top: 0; bottom: 0; left: 0; right: 0;
   max-width: 480px;
   margin: 0 auto;
-  height: 100vh;
-  height: 100dvh;
   background: var(--card);
   /* deploy's #phone base: the serif is the default, Work Sans is opt-in for
      small meta labels only. Without this, every 600-weight title lands as
      heavy bold sans. */
   font-family: 'Cormorant Garamond', Georgia, serif;
   color: var(--ink);
-  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -370,7 +374,6 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
   html, body { background: radial-gradient(ellipse at 50% 0%, var(--page-1), var(--page-3)); }
   #app-shell {
     max-width: 1180px;
-    height: 100vh; height: 100dvh;
     flex-direction: row;
     border-radius: 0;
   }
