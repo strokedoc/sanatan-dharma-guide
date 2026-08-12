@@ -321,7 +321,7 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 .pager {
   flex: none; display: flex; align-items: center; justify-content: space-between;
   gap: 12px; background: var(--card);
-  margin: 0 28px; padding: 12px 0 calc(22px + env(safe-area-inset-bottom));
+  margin: 0 28px; padding: 12px 0 max(22px, env(safe-area-inset-bottom));
 }
 .pager .pg {
   background: none; border: none; padding: 0; cursor: pointer;
@@ -340,7 +340,7 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 
 /* ── TAB BAR ── */
 .tabbar {
-  flex: none; background: var(--tabbar); padding: 11px 20px calc(14px + env(safe-area-inset-bottom));
+  flex: none; background: var(--tabbar); padding: 11px 20px max(14px, env(safe-area-inset-bottom));
   display: flex; justify-content: space-between;
   box-shadow: 0 -1px 0 rgba(255,255,255,.6) inset, 0 -6px 18px rgba(120,105,80,.1);
 }
@@ -446,3 +446,39 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 }
 .lang-toggle button.gu { font-family: 'Noto Serif Gujarati', serif; font-size: 11px; }
 .lang-toggle button.on { background: var(--ink); color: #EFEBE2; }
+
+/* ══════ SHORT VIEWPORTS (phone landscape) ══════
+   A phone on its side is ~390px tall. The hero alone was taller than that,
+   so nothing below it was reachable. Compress the vertical chrome; the side
+   rail stays because horizontal space is what landscape actually has.
+   Must come last so it wins over the ≥768px block above. */
+@media (max-height: 560px) {
+  .home-hero .top-row { padding-top: 14px; }
+  .home-hero .om-wrap,
+  .home-hero .om-disc { width: 64px; height: 64px; }
+  .home-hero .om-wrap { margin-top: 8px; }
+  .home-hero .om-disc span { font-size: 30px; transform: translateY(6px); }
+  .home-hero .mandala { width: 190px; height: 190px; }
+  .home-hero .halo { width: 124px; height: 124px; }
+  .home-hero .ring { width: 92px; height: 92px; }
+  .home-hero .titles { padding: 6px 26px 10px; }
+  .home-hero .titles .t1 { font-size: 18px; letter-spacing: .1em; }
+  .home-hero .titles .t2 { font-size: 12.5px; }
+  .home-hero .desc { display: none; }          /* long intro; hero must stay short */
+
+  .screen-head { padding-top: 16px; padding-bottom: 12px; }
+  .screen-head .search-box { margin-top: 10px; }
+  .reader-head { padding-top: 14px; padding-bottom: 12px; }
+  .reader-head .title { font-size: 21px; }
+  .reader-head .eyebrow { margin-top: 8px; }
+  .reader-head .deva .gloss-sub { display: none; }   /* buys ~20px of reading */
+  .pips { padding-top: 9px; }
+  .pane { padding-top: 12px; padding-bottom: 80px; }
+  .home-body { padding-top: 14px; padding-bottom: 80px; }
+  .reader-content { padding-top: 14px; }
+
+  /* the rail loses its desktop breathing room */
+  .tabbar { padding: 12px 12px; }
+  .tabbar::before { font-size: 22px; margin: 0 0 12px; }
+  .tab-btn { padding: 9px 12px; }
+}
