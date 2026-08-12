@@ -1,6 +1,6 @@
 /* ═══════════════ SHELL — cream/gold app design ═══════════════ */
 :root {
-  --page-1: #DAD4C8;
+  --page-1: #DFDACE;   /* = theme-color, so the iOS status bar blends */
   --page-2: #C9C1B2;
   --page-3: #BCB2A0;
   --card: #EFEBE2;
@@ -150,7 +150,7 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 .home-hero {
   flex: none; position: relative; z-index: 3; overflow: hidden;
   padding-bottom: 42px;                 /* empty sand for the fade-out zone */
-  background: linear-gradient(168deg,#DAD4C8 0%,#C9C1B2 68%,#C4BBAA 100%);
+  background: linear-gradient(168deg,#DFDACE 0%,#C9C1B2 68%,#C4BBAA 100%);
   /* the hero's own lower edge dissolves, so content sliding underneath fades
      out instead of being cut off at a container boundary */
   -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 46px), transparent 100%);
