@@ -608,3 +608,60 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
 const boot = parseHash();
 if (boot) S = Object.assign({}, S, boot);
 render();
+
+/* ── layout probe: add ?debug to the URL ──────────────────────────────────
+   Simulators report env(safe-area-inset-*) as 0, so real-device layout bugs
+   cannot be reproduced here. This prints what the device actually reports. */
+function showLayoutProbe() {
+  if (document.getElementById('sd-probe')) { document.getElementById('sd-probe').remove(); return; }
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;top:0;left:0;height:0;width:0;' +
+    'padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);';
+  document.body.appendChild(probe);
+  const ps = getComputedStyle(probe);
+  const insetTop = ps.paddingTop, insetBottom = ps.paddingBottom;
+  probe.remove();
+
+  const r = el => { const b = el.getBoundingClientRect();
+    return Math.round(b.top) + '→' + Math.round(b.bottom) + ' (h' + Math.round(b.height) + ')'; };
+  const shell = document.getElementById('app-shell');
+  const nav = document.getElementById('nav');
+  const bar = document.querySelector('.tabbar');
+  const vv = window.visualViewport;
+
+  const box = document.createElement('div');
+  box.id = 'sd-probe';
+  box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:9999;' +
+    'background:#1b1b1b;color:#EFEBE2;font:11px/1.5 ui-monospace,Menlo,monospace;' +
+    'padding:10px 12px;border-radius:10px;white-space:pre;overflow:auto;max-height:52vh;' +
+    'box-shadow:0 6px 30px rgba(0,0,0,.5)';
+  box.textContent = [
+    'inner        ' + innerWidth + ' x ' + innerHeight,
+    'visualVP     ' + (vv ? Math.round(vv.width) + ' x ' + Math.round(vv.height) : 'n/a'),
+    'screen       ' + screen.width + ' x ' + screen.height + '  dpr ' + devicePixelRatio,
+    'safe-area    top ' + insetTop + '   bottom ' + insetBottom,
+    'standalone   ' + (matchMedia('(display-mode: standalone)').matches ||
+                       navigator.standalone === true),
+    'shell        ' + r(shell) + '  pos ' + getComputedStyle(shell).position,
+    'nav          ' + r(nav) + '  pos ' + getComputedStyle(nav).position,
+    'tabbar       ' + r(bar) + '  padB ' + getComputedStyle(bar).paddingBottom,
+    'GAP BELOW    ' + Math.round(innerHeight - bar.getBoundingClientRect().bottom) + 'px',
+    'sw           ' + (navigator.serviceWorker && navigator.serviceWorker.controller
+                       ? 'controlled' : 'none'),
+    'css build    v12'
+  ].join('\n');
+  box.onclick = () => box.remove();
+  document.body.appendChild(box);
+}
+
+/* ?debug in a browser, or five taps on the ॐ inside the installed app —
+   the home-screen icon gives no address bar to type a query into */
+if (/(^|[?&])debug\b/.test(location.search) || /debug/.test(location.hash)) showLayoutProbe();
+let probeTaps = 0, probeTimer = null;
+document.addEventListener('click', e => {
+  if (!e.target.closest('.om-disc')) return;
+  probeTaps++;
+  clearTimeout(probeTimer);
+  probeTimer = setTimeout(() => { probeTaps = 0; }, 1200);
+  if (probeTaps >= 5) { probeTaps = 0; showLayoutProbe(); }
+});
