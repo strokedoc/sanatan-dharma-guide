@@ -157,9 +157,9 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 .home-hero + .scroll {
   background: linear-gradient(180deg,
     #C4BBAA 0,
-    #CFC7B8 58px,
-    #E2DCD0 118px,
-    var(--card) 172px);
+    #C4BBAA 20px,     /* hold the sand to the top of the description */
+    #D9D2C5 60px,     /* lighten through its first lines */
+    var(--card) 104px);
 }
 .home-hero .top-row { position:relative;z-index:3;padding:max(16px, env(safe-area-inset-top)) 26px 0;display:flex;align-items:center;justify-content:space-between; }
 
