@@ -150,11 +150,16 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
   background: linear-gradient(168deg,#DAD4C8 0%,#C9C1B2 62%,#C4BBAA 100%);
   box-shadow: inset 0 -8px 18px rgba(120,105,80,.08);
 }
-/* dissolve the sand into the cream below so the two panes read as one page */
-.home-hero::after {
-  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 60px;
-  background: linear-gradient(180deg, rgba(239,235,226,0), var(--card));
-  pointer-events: none; z-index: 2;
+/* The hero now ends on flat sand (#C4BBAA) and the scroll column picks that
+   exact tone up and carries it down past the description before turning to
+   cream. Backgrounds on a scroll container stay put while content moves, so
+   this reads as one continuous wash rather than a seam. */
+.home-hero + .scroll {
+  background: linear-gradient(180deg,
+    #C4BBAA 0,
+    #CFC7B8 58px,
+    #E2DCD0 118px,
+    var(--card) 172px);
 }
 .home-hero .top-row { position:relative;z-index:3;padding:max(16px, env(safe-area-inset-top)) 26px 0;display:flex;align-items:center;justify-content:space-between; }
 
