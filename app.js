@@ -273,7 +273,7 @@ const YOGA = [
   { deva: 'कर्म',  en: 'Karma',  gu: 'કર્મ',  nEn: 'The path of action',     nGu: 'કર્મનો માર્ગ' },
   { deva: 'राज',   en: 'Rāja',   gu: 'રાજ',   nEn: 'The path of meditation', nGu: 'ધ્યાનનો માર્ગ' }
 ];
-const PRACTICE_IDS = ['yogas', 'ethics', 'practice', 'festivals', 'questions'];
+const PRACTICE_IDS = ['yogas', 'ethics', 'practice', 'mantras', 'festivals', 'questions'];
 
 function renderPractice() {
   const links = PRACTICE_IDS.map(chById);
