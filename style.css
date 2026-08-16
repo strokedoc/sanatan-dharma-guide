@@ -408,6 +408,8 @@ button.card.chapter-row, button.card.fest-row, button.card.practice-link { displ
   transition: opacity .25s, transform .25s;
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
+/* update toast: tappable and persistent until acted on */
+.toast.update { pointer-events: auto; border: 0; cursor: pointer; background: var(--gold-deep); }
 
 @media (prefers-reduced-motion: reduce) {
   .home-hero .mandala, .home-hero .halo, .home-hero .ring { animation: none !important; }

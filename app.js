@@ -707,8 +707,39 @@ function render() {
   }
 }
 
+/* ── update flow ──────────────────────────────────────────────────────────
+   sw.js calls skipWaiting + clients.claim, so a newly published version takes
+   control the moment it installs. Two additions make that reach the user:
+   - reg.update() every time the app returns to the foreground (an installed
+     PWA resumed from the app switcher never re-navigates, so without this the
+     browser may not look for a new sw.js for a long time)
+   - a persistent toast on controllerchange offering a one-tap reload, since
+     the page's in-memory code is still the old version until reloaded */
+function showUpdateToast() {
+  if ($('#update-toast')) return;
+  const el = document.createElement('button');
+  el.id = 'update-toast';
+  el.className = 'toast show update';
+  el.textContent = t('✦ New version ready — tap to reload', '✦ નવું સંસ્કરણ તૈયાર — રીલોડ કરવા દબાવો');
+  el.onclick = () => location.reload();
+  document.body.appendChild(el);
+}
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') reg.update().catch(() => {});
+      });
+    }).catch(() => {});
+    /* controllerchange also fires on the very first install, when the page is
+       already the newest version — only the handoff from an OLD worker to a
+       new one should prompt */
+    let hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController) { hadController = true; return; }
+      showUpdateToast();
+    });
+  });
 }
 
 /* open on whatever the URL points at, so a shared chapter link lands there */
