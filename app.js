@@ -137,7 +137,12 @@ function renderPanchang() {
     if (!g || g.key !== key) { g = { key, y: dt.getFullYear(), m: dt.getMonth(), rows: [] }; groups.push(g); }
     g.rows.push(festRow(f, { full: true, anchor: i === nextIdx }));
   });
-  const body = groups.map(g => `
+  /* the table is finite; say so rather than opening on a wall of past dates */
+  const spent = nextIdx < 0
+    ? `<div class="empty-state"><p>${t('This calendar runs to the end of 2027. Update the app for later dates.',
+                                       'આ પંચાંગ ૨૦૨૭ના અંત સુધીનું છે. પછીની તિથિઓ માટે ઍપ અપડેટ કરો.')}</p></div>`
+    : '';
+  const body = spent + groups.map(g => `
     <div class="group-label">${t(MONTHS_EN[g.m], MONTHS_GU[g.m])} ${g.y}</div>
     <div class="chapter-list">${g.rows.join('')}</div>`).join('');
   return `
@@ -452,7 +457,7 @@ function renderReader() {
 /* ═══════════ TAB BAR ═══════════ */
 function renderTabs() {
   const tab = (id, icon, label, om) => `
-    <button class="tab-btn ${S.tab===id?'active':''}" onclick="setS({tab:'${id}',reader:null,part:null})">
+    <button class="tab-btn ${S.tab===id || (id==='practice' && S.tab==='panchang') ?'active':''}" onclick="setS({tab:'${id}',reader:null,part:null})">
       <span class="ic ${om?'om':''}">${icon}</span><span class="lbl">${label}</span>
     </button>`;
   return `<div class="tabbar">
@@ -523,9 +528,13 @@ function pageTurn(dir) {
 function attachSwipe(sc) {
   let x0 = 0, y0 = 0, t0 = 0;
   sc.addEventListener('touchstart', e => {
+    /* a second finger means a pinch-zoom or two-finger pan, not a page turn;
+       without this, dx gets measured between two DIFFERENT fingers */
+    if (e.touches.length > 1) { t0 = 0; return; }
     const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; t0 = Date.now();
   }, { passive: true });
   sc.addEventListener('touchend', e => {
+    if (!t0 || e.touches.length || e.changedTouches.length !== 1) return;
     const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
     if (Date.now() - t0 > 600) return;                       // slow drag, not a swipe
     if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;  // mostly vertical
@@ -683,7 +692,18 @@ function initQuiz(box) {
 }
 
 /* ═══════════ main render ═══════════ */
+/* "Today"/"in 3 days" are computed at render time, so an app left resident
+   overnight would keep yesterday's wording. Re-render on the first foreground
+   of a new day — and only then, since a blanket re-render would throw away the
+   reader's scroll position every time the app is resumed. */
+let renderedDay = '';
+function dayKey() { const d = new Date(); return d.getFullYear() + '/' + d.getMonth() + '/' + d.getDate(); }
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && renderedDay !== dayKey()) render();
+});
+
 function render() {
+  renderedDay = dayKey();
   document.documentElement.setAttribute('data-app-lang', S.lang);
   let inner;
   if (S.reader) {
@@ -723,6 +743,10 @@ function render() {
      browser may not look for a new sw.js for a long time)
    - a persistent toast on controllerchange offering a one-tap reload, since
      the page's in-memory code is still the old version until reloaded */
+/* sw.js is network-first, so a plain open already runs the newest code — only
+   an update that lands while the app is ALREADY running leaves stale code in
+   memory and is worth a toast */
+let swArmed = false;
 function showUpdateToast() {
   if ($('#update-toast')) return;
   const el = document.createElement('button');
@@ -736,16 +760,13 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') reg.update().catch(() => {});
+        if (document.visibilityState !== 'visible') return;
+        swArmed = true;
+        reg.update().catch(() => {});
       });
     }).catch(() => {});
-    /* controllerchange also fires on the very first install, when the page is
-       already the newest version — only the handoff from an OLD worker to a
-       new one should prompt */
-    let hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!hadController) { hadController = true; return; }
-      showUpdateToast();
+      if (swArmed) showUpdateToast();
     });
   });
 }
