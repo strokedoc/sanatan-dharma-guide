@@ -1,5 +1,5 @@
 /* Sanatana Dharma PWA service worker */
-const VERSION = 'sd-v24';
+const VERSION = 'sd-v25';
 const PRECACHE = [
   './index.html',
   './style.css',
