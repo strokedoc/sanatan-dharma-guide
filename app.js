@@ -37,6 +37,7 @@ let S = {
   progress: readJSON('sd-progress', {}),
   font: Math.min(3, Math.max(0, parseInt(store.get('sd-font', '2'), 10) || 0)),
   query: '',
+  part: null,        // library filtered to one part, opened from a home tile
   lastRead: store.get('sd-lastread', '') || null,
 };
 function setS(patch) {
@@ -163,7 +164,7 @@ function renderHome() {
   const lastId = S.lastRead && chById(S.lastRead) ? S.lastRead : CH[0].id;
   const cur = chById(lastId);
   const partsHtml = PARTS.map(p => `
-    <button type="button" class="card clickable part-card" onclick="setS({tab:'library',query:''})">
+    <button type="button" class="card clickable part-card" onclick="setS({tab:'library',query:'',part:${p.id}})">
       <div class="deva">${p.deva}</div>
       <div class="title">${esc(t(p.en, p.gu))}</div>
       <div class="count">${CH.filter(c=>c.part===p.id).length}${t(' chapters',' પ્રકરણ')}</div>
@@ -236,16 +237,23 @@ function renderLibrary() {
       <div class="body"><div class="title">${chTitle(c)}</div><div class="meta">${readMeta(c)}</div></div>
       <span class="mark">${S.saved.includes(c.id) ? '❖' : (pct(c.id)>=96 ? '✓' : '')}</span>
     </button>`;
-  const groups = PARTS.map(p => ({ label: t(p.en, p.gu).toUpperCase(), items: CH.filter(c => c.part===p.id && match(c)) })).filter(g => g.items.length);
+  /* a home tile opens one part on its own; the search box widens back to all */
+  const part = q ? null : PARTS.find(p => p.id === S.part);
+  const shown = part ? PARTS.filter(p => p.id === part.id) : PARTS;
+  const groups = shown.map(p => ({ label: t(p.en, p.gu).toUpperCase(), items: CH.filter(c => c.part===p.id && match(c)) })).filter(g => g.items.length);
   const body = groups.length
-    ? groups.map(g => `<div class="group-label">${g.label}</div><div class="chapter-list">${g.items.map(row).join('')}</div>`).join('')
+    ? groups.map(g => `${part ? '' : `<div class="group-label">${g.label}</div>`}<div class="chapter-list">${g.items.map(row).join('')}</div>`).join('')
     : `<div class="empty-state"><p>${t('Nothing found.','કંઈ મળ્યું નહીં.')}</p></div>`;
   return `
   <div class="screen-head">
     <div class="row">
-      <div class="screen-title">${t('LIBRARY','ગ્રંથાલય')}</div>
+      <div class="screen-title${part ? ' with-back' : ''}">
+        ${part ? `<button class="back" onclick="setS({part:null})">←</button>` : ''}
+        ${part ? esc(t(part.en, part.gu).toUpperCase()) : t('LIBRARY','ગ્રંથાલય')}
+      </div>
       ${langToggle()}
     </div>
+    ${part ? `<div class="screen-sub">${part.deva} · ${CH.filter(c=>c.part===part.id).length}${t(' chapters',' પ્રકરણ')}</div>` : ''}
     <div class="search-box">
       <span class="ic">⌕</span>
       <input type="search" value="${esc(S.query)}" oninput="setS({query:this.value})"
@@ -444,7 +452,7 @@ function renderReader() {
 /* ═══════════ TAB BAR ═══════════ */
 function renderTabs() {
   const tab = (id, icon, label, om) => `
-    <button class="tab-btn ${S.tab===id?'active':''}" onclick="setS({tab:'${id}',reader:null})">
+    <button class="tab-btn ${S.tab===id?'active':''}" onclick="setS({tab:'${id}',reader:null,part:null})">
       <span class="ic ${om?'om':''}">${icon}</span><span class="lbl">${label}</span>
     </button>`;
   return `<div class="tabbar">
@@ -473,7 +481,7 @@ function parseHash() {
   const m = (location.hash || '').match(/^#\/([a-zA-Z-]+)(?:\/(\d+))?$/);
   if (!m) return null;
   const key = m[1];
-  if (TABS.includes(key)) return { tab: key, reader: null, sec: 0 };
+  if (TABS.includes(key)) return { tab: key, reader: null, sec: 0, part: null };
   const c = chById(key);
   if (!c) return null;
   const total = ((S.lang === 'en' ? c.en : c.gu) || []).length;

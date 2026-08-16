@@ -286,7 +286,9 @@ button.card.chapter-row, button.card.fest-row, button.card.practice-link { displ
 .fest-row.today .fest-date { background:linear-gradient(160deg,var(--amber-1),var(--amber-2));color:#fff;box-shadow:0 2px 8px rgba(201,124,21,.3); }
 .fest-label { display:flex;align-items:center;justify-content:space-between; }
 .fest-label .see-all { border:0;background:none;color:var(--gold-deep);font:500 11px 'Work Sans',sans-serif;letter-spacing:.06em;cursor:pointer;padding:0; }
-.screen-title.with-back { display:flex;align-items:center;gap:10px; }
+/* the longest part name ("LIVING TRADITION") must clear the language toggle
+   on a 375px screen, so back-headers run smaller than a plain screen title */
+.screen-title.with-back { display:flex;align-items:center;gap:9px;font-size:17px;letter-spacing:.06em;white-space:nowrap; }
 .screen-title .back { border:0;background:none;font-size:20px;color:var(--gold-deep);cursor:pointer;padding:0 2px;line-height:1; }
 .panchang-foot { margin:18px 4px 8px;font-size:15px;font-style:italic;color:var(--ink-soft);font-family:'Cormorant Garamond',serif;line-height:1.5; }
 .panchang-foot a { color:var(--gold-deep);cursor:pointer;font-style:normal;font-weight:600; }
