@@ -1,10 +1,11 @@
 /* Sanatana Dharma PWA service worker */
-const VERSION = 'sd-v19';
+const VERSION = 'sd-v20';
 const PRECACHE = [
   './index.html',
   './style.css',
   './reader.css',
   './data.js',
+  './panchang.js',
   './hero.js',
   './extra.js',
   './app.js',

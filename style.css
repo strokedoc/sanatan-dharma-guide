@@ -123,7 +123,7 @@ button.card {
   display: block; width: 100%; margin: 0; border: none;
   font: inherit; color: inherit; text-align: left; -webkit-appearance: none;
 }
-button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { display: flex; }
+button.card.chapter-row, button.card.fest-row, button.card.practice-link { display: flex; }
 
 /* visible keyboard focus — the app sets outline:none on the search field and
    UA focus rings are invisible against these buttons */
@@ -238,19 +238,6 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 .verse-card .txt { font-size:15.5px;font-style:italic;color:var(--ink-soft);margin-top:7px;font-family:'Cormorant Garamond',serif; }
 .verse-card .cite { font:400 10.5px 'Work Sans',sans-serif;letter-spacing:.16em;color:var(--ink-faint);margin-top:9px; }
 
-.upcoming-card { margin-top: 18px; padding: 15px 18px; display: flex; gap: 15px; align-items: center; }
-.upcoming-card .chip {
-  flex:none;width:48px;height:48px;border-radius:12px;color:#fff;
-  background:linear-gradient(160deg,var(--amber-1),var(--amber-2));
-  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;
-}
-.upcoming-card .chip .d { font-family:'Cinzel',serif;font-size:16px; }
-.upcoming-card .chip .m { font:500 8px 'Work Sans',sans-serif;letter-spacing:.1em;margin-top:2px; }
-.upcoming-card .body { flex:1; }
-.upcoming-card .eyebrow { font:500 10px 'Work Sans',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--gold); }
-.upcoming-card .title { font-size:19px;font-weight:600;line-height:1.2;color:var(--ink); }
-.upcoming-card .arrow { color:var(--ink-faint);font-size:15px; }
-
 .explore-grid { margin-top: 11px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .part-card { padding: 16px 15px; cursor: pointer; }
 .part-card .deva { font-family:'Noto Serif Devanagari',serif;font-size:18px;color:var(--gold); }
@@ -277,21 +264,34 @@ button.card.chapter-row, button.card.upcoming-card, button.card.practice-link { 
 .empty-state .glyph { font-family:'Noto Serif Devanagari',serif;font-size:38px;color:rgba(176,128,31,.45); }
 .empty-state p { font-size:16px;font-style:italic;color:var(--ink-soft);margin-top:12px;line-height:1.5;font-family:'Cormorant Garamond',serif; }
 
-/* ── PRACTICE ── */
-.fest-row { padding: 13px 16px; display: flex; gap: 14px; align-items: center; margin-bottom: 10px; }
-.fest-row .chip {
+/* ── FESTIVALS / PANCHĀNG ── */
+.fest-row { padding: 13px 16px; display: flex; gap: 14px; align-items: center; margin-bottom: 10px; text-align: left; width: 100%; }
+.fest-date {
   flex:none;width:46px;height:46px;border-radius:12px;display:flex;flex-direction:column;
   align-items:center;justify-content:center;line-height:1;
   background: linear-gradient(160deg, var(--card-soft), var(--card-mid));
   box-shadow: inset 1px 2px 4px rgba(255,255,255,.6), inset -1px -2px 5px rgba(120,105,80,.25);
   color: var(--gold-deep);
 }
-.fest-row .chip.soon { background: linear-gradient(160deg, var(--amber-1), var(--amber-2)); color: #fff; box-shadow: 0 2px 8px rgba(201,124,21,.3); }
-.fest-row .chip .d { font-family:'Cinzel',serif;font-size:16px; }
-.fest-row .chip .m { font:500 8px 'Work Sans',sans-serif;letter-spacing:.1em;margin-top:2px; }
-.fest-row .title { font-size:19px;font-weight:600;color:var(--ink);line-height:1.2; }
-.fest-row .note { font:400 11.5px 'Work Sans',sans-serif;color:var(--ink-faint);margin-top:2px; }
+.fest-date b { font-family:'Cinzel',serif;font-size:16px;font-weight:600; }
+.fest-date i { font:500 8px 'Work Sans',sans-serif;letter-spacing:.08em;font-style:normal;margin-top:2px;text-transform:uppercase; }
+.fest-row .body { flex:1;min-width:0; }
+.fest-row .title { font-size:18px;font-weight:600;color:var(--ink);line-height:1.2; }
+[data-app-lang="gu"] .fest-row .title { font-size:16.5px; }
+.fest-row .meta { font:400 11.5px 'Work Sans',sans-serif;color:var(--ink-faint);margin-top:2px; }
+.fest-row .note { font-size:14.5px;font-style:italic;color:var(--ink-soft);margin-top:4px;line-height:1.4;font-family:'Cormorant Garamond',serif; }
+.fest-when { flex:none;font:500 10.5px 'Work Sans',sans-serif;color:var(--gold-deep);letter-spacing:.02em; }
+.fest-when.now { background:linear-gradient(160deg,var(--amber-1),var(--amber-2));color:#fff;padding:4px 9px;border-radius:10px; }
+.fest-row.past { opacity:.45; }
+.fest-row.today .fest-date { background:linear-gradient(160deg,var(--amber-1),var(--amber-2));color:#fff;box-shadow:0 2px 8px rgba(201,124,21,.3); }
+.fest-label { display:flex;align-items:center;justify-content:space-between; }
+.fest-label .see-all { border:0;background:none;color:var(--gold-deep);font:500 11px 'Work Sans',sans-serif;letter-spacing:.06em;cursor:pointer;padding:0; }
+.screen-title.with-back { display:flex;align-items:center;gap:10px; }
+.screen-title .back { border:0;background:none;font-size:20px;color:var(--gold-deep);cursor:pointer;padding:0 2px;line-height:1; }
+.panchang-foot { margin:18px 4px 8px;font-size:15px;font-style:italic;color:var(--ink-soft);font-family:'Cormorant Garamond',serif;line-height:1.5; }
+.panchang-foot a { color:var(--gold-deep);cursor:pointer;font-style:normal;font-weight:600; }
 
+/* ── PRACTICE ── */
 .yoga-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .yoga-card {
   padding: 16px 15px; border-radius: 14px;

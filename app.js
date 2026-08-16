@@ -35,7 +35,7 @@ let S = {
   sec: 0,
   saved: readJSON('sd-saved', []),
   progress: readJSON('sd-progress', {}),
-  font: Math.min(2, Math.max(0, parseInt(store.get('sd-font', '1'), 10) || 0)),
+  font: Math.min(3, Math.max(0, parseInt(store.get('sd-font', '2'), 10) || 0)),
   query: '',
   lastRead: store.get('sd-lastread', '') || null,
 };
@@ -61,9 +61,9 @@ function readMeta(c) {
   return m;
 }
 
-/* deploy's reader scale: 17 / 19 / 21px */
-const FONT_STEPS = [17, 19, 21];
-const FONT_LABELS = ['A', 'Aa', 'AA'];
+/* reader scale: 21px default (easiest read), 23px for larger still */
+const FONT_STEPS = [17, 19, 21, 23];
+const FONT_LABELS = ['A', 'Aa', 'AA', 'AA⁺'];
 
 /* the mandala web from the original guide, re-struck in gold and set turning */
 const MANDALA = `<svg class="mandala" viewBox="0 0 700 700" aria-hidden="true" focusable="false">
@@ -91,6 +91,71 @@ function langToggle() {
     <button class="${S.lang==='en'?'on':''}" onclick="setS({lang:'en'})">EN</button>
     <button class="gu ${S.lang==='gu'?'on':''}" onclick="setS({lang:'gu'})">ગુજરાતી</button>
   </div>`;
+}
+
+/* ═══════════ PANCHĀNG helpers ═══════════ */
+const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_GU = ['જાન્યુઆરી','ફેબ્રુઆરી','માર્ચ','એપ્રિલ','મે','જૂન','જુલાઈ','ઑગસ્ટ','સપ્ટેમ્બર','ઑક્ટોબર','નવેમ્બર','ડિસેમ્બર'];
+const WEEKDAYS_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const WEEKDAYS_GU = ['રવિ','સોમ','મંગળ','બુધ','ગુરુ','શુક્ર','શનિ'];
+
+function festDate(f) { const [y, m, d] = f.d.split('-').map(Number); return new Date(y, m - 1, d); }
+function daysUntil(f) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((festDate(f) - today) / 86400000);
+}
+function festWhen(du) {
+  return du === 0 ? t('Today', 'આજે')
+       : du === 1 ? t('Tomorrow', 'આવતીકાલે')
+       : t('in ' + du + ' days', du + ' દિવસમાં');
+}
+function festRow(f, opts) {
+  const dt = festDate(f), du = daysUntil(f);
+  const cls = 'fest-row' + (opts.full ? ' full' : '') + (du < 0 ? ' past' : '') + (du === 0 ? ' today' : '');
+  return `
+    <${opts.full ? 'div' : 'button type="button" onclick="setS({tab:\'panchang\',reader:null})"'}
+      class="card ${opts.full ? '' : 'clickable '}${cls}"${opts.anchor ? ' id="fest-next"' : ''}>
+      <span class="fest-date"><b>${dt.getDate()}</b><i>${t(WEEKDAYS_EN[dt.getDay()], WEEKDAYS_GU[dt.getDay()])}</i></span>
+      <div class="body">
+        <div class="title">${esc(t(f.en, f.gu))}</div>
+        <div class="meta">${esc(t(f.t_en, f.t_gu))}</div>
+        ${opts.full && f.n_en ? `<div class="note">${esc(t(f.n_en, f.n_gu))}</div>` : ''}
+      </div>
+      ${du >= 0 ? `<span class="fest-when${du === 0 ? ' now' : ''}">${festWhen(du)}</span>` : ''}
+    </${opts.full ? 'div' : 'button'}>`;
+}
+
+/* the panchāng screen: every festival grouped by month, past ones dimmed */
+function renderPanchang() {
+  const nextIdx = FESTIVALS.findIndex(f => daysUntil(f) >= 0);
+  const groups = [];
+  FESTIVALS.forEach((f, i) => {
+    const dt = festDate(f), key = dt.getFullYear() + '-' + dt.getMonth();
+    let g = groups[groups.length - 1];
+    if (!g || g.key !== key) { g = { key, y: dt.getFullYear(), m: dt.getMonth(), rows: [] }; groups.push(g); }
+    g.rows.push(festRow(f, { full: true, anchor: i === nextIdx }));
+  });
+  const body = groups.map(g => `
+    <div class="group-label">${t(MONTHS_EN[g.m], MONTHS_GU[g.m])} ${g.y}</div>
+    <div class="chapter-list">${g.rows.join('')}</div>`).join('');
+  return `
+  <div class="screen-head">
+    <div class="row">
+      <div class="screen-title with-back">
+        <button class="back" onclick="setS({tab:'home',reader:null})">←</button>
+        ${t('PANCHĀNG', 'પંચાંગ')}
+      </div>
+      ${langToggle()}
+    </div>
+    <div class="screen-sub">${t('Festival dates follow the Indian panchāng; local observance can differ by a day.',
+                                'તિથિ ભારતીય પંચાંગ પ્રમાણે; સ્થાનિક ઉજવણી એક દિવસ આગળ-પાછળ હોઈ શકે.')}</div>
+  </div>
+  <div class="scroll" id="panchangScroll"><div class="pane lib">${body}
+    <p class="panchang-foot">${t('Wondering what these festivals mean? Read the chapter on festivals and the sixteen saṃskāras.',
+                                 'આ ઉત્સવોનો અર્થ જાણવો છે? ઉત્સવો અને સોળ સંસ્કાર વિશેનું પ્રકરણ વાંચો.')}
+      <a onclick="openReader('festivals')">${t('Open chapter ›', 'પ્રકરણ ખોલો ›')}</a></p>
+  </div></div>`;
 }
 
 /* ═══════════ HOME ═══════════ */
@@ -141,18 +206,22 @@ function renderHome() {
         <div class="cite">ṚGVEDA 1.164.46</div>
       </div>
 
-      <button type="button" class="card clickable upcoming-card" onclick="openReader('festivals')">
-        <div class="chip soon"><span class="d">卐</span></div>
-        <div class="body">
-          <div class="title">${chTitle(chById('festivals'))}</div>
-        </div>
-        <span class="arrow">›</span>
-      </button>
+      ${(() => {
+        const next = FESTIVALS.filter(f => daysUntil(f) >= 0).slice(0, 3);
+        if (!next.length) return '';
+        return `
+      <div class="section-label fest-label" style="margin-top:24px">
+        <span>${t('UPCOMING FESTIVALS', 'આગામી ઉત્સવો')}</span>
+        <button class="see-all" onclick="setS({tab:'panchang',reader:null})">${t('Full panchāng ›', 'પૂરું પંચાંગ ›')}</button>
+      </div>
+      <div class="chapter-list">${next.map(f => festRow(f, {})).join('')}</div>`;
+      })()}
 
       <div class="section-label" style="margin-top:24px">${t('EXPLORE','વિષય-વિભાગ')}</div>
       <div class="explore-grid">${partsHtml}</div>
 
       ${S.deferredInstall ? `<div class="install-row"><button onclick="doInstall()">${t('📲 Install as App','📲 ઍપ તરીકે ઇન્સ્ટૉલ કરો')}</button></div>` : ''}
+      <div class="install-row"><button onclick="shareChapter()">${t('↗ Share this app','↗ ઍપ શેર કરો')}</button></div>
     </div>
   </div>`;
 }
@@ -219,7 +288,12 @@ function renderPractice() {
     <div class="screen-sub">${t('The calendar and the four paths','ઉત્સવ-પંચાંગ અને ચાર માર્ગ')}</div>
   </div>
   <div class="scroll"><div class="pane lib">
-    <div class="section-label">${t('THE FOUR PATHS','ચાર માર્ગ')}</div>
+    <button type="button" class="card clickable practice-link panchang-link" onclick="setS({tab:'panchang',reader:null})">
+      <span class="ic">🪔</span>
+      <span class="title">${t('Utsav Panchāng — festival dates','ઉત્સવ પંચાંગ — તિથિ-તારીખ')}</span>
+      <span class="arrow">›</span>
+    </button>
+    <div class="section-label" style="margin-top:20px">${t('THE FOUR PATHS','ચાર માર્ગ')}</div>
     <div class="yoga-grid" style="margin-top:11px">${YOGA.map(yogaCard).join('')}</div>
     <div class="section-label" style="display:block;margin-top:24px">${t(PARTS[3].en.toUpperCase(), PARTS[3].gu)}</div>
     <div class="practice-links" style="margin-top:11px">${links.map(linkRow).join('')}</div>
@@ -384,7 +458,7 @@ function renderTabs() {
 /* ═══════════ deep links ═══════════
    Without this the URL never changes, so Share only ever sent the app's base
    address and the recipient landed on Home. */
-const TABS = ['home', 'library', 'practice', 'saved'];
+const TABS = ['home', 'library', 'practice', 'saved', 'panchang'];
 
 function currentHash() {
   if (S.reader) return '#/' + S.reader + '/' + (S.sec + 1);
@@ -421,6 +495,34 @@ function openReader(id, sec) {
   store.set('sd-lastread', id);
   setS({ reader: id, sec: at, lastRead: id });
   markProgress(id, at, total);
+}
+
+/* swipe left/right in the reader turns pages like a book; mirrors the pager
+   buttons exactly, including crossing into the previous/next chapter */
+function pageTurn(dir) {
+  const c = chById(S.reader);
+  if (!c) return;
+  const secs = chSecs(c), i = S.sec, idx = chIndex(c.id);
+  if (dir > 0) {
+    if (i < secs.length - 1) goSection(i + 1);
+    else if (idx < CH.length - 1) openReader(CH[idx + 1].id);
+    else setS({ reader: null, sec: 0 });
+  } else {
+    if (i > 0) goSection(i - 1);
+    else if (idx > 0) openReader(CH[idx - 1].id, -1);
+  }
+}
+function attachSwipe(sc) {
+  let x0 = 0, y0 = 0, t0 = 0;
+  sc.addEventListener('touchstart', e => {
+    const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; t0 = Date.now();
+  }, { passive: true });
+  sc.addEventListener('touchend', e => {
+    const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+    if (Date.now() - t0 > 600) return;                       // slow drag, not a swipe
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;  // mostly vertical
+    pageTurn(dx < 0 ? 1 : -1);
+  }, { passive: true });
 }
 
 function goSection(n) {
@@ -582,7 +684,7 @@ function render() {
     if (S.sec > secs.length - 1) S.sec = Math.max(0, secs.length - 1);
     inner = renderReader();
   } else {
-    inner = S.tab==='home' ? renderHome() : S.tab==='library' ? renderLibrary() : S.tab==='practice' ? renderPractice() : renderSaved();
+    inner = S.tab==='home' ? renderHome() : S.tab==='library' ? renderLibrary() : S.tab==='practice' ? renderPractice() : S.tab==='panchang' ? renderPanchang() : renderSaved();
   }
   $('#stage').innerHTML = inner;
   /* nav lives outside #stage so it can be a bottom bar on phones and a
@@ -596,7 +698,12 @@ function render() {
     const quizBox = $('.path-quiz', $('#readerBody'));
     if (quizBox) initQuiz(quizBox);
     const sc = $('#readerScroll');
-    if (sc) sc.addEventListener('scroll', closePop, { passive: true });
+    if (sc) { sc.addEventListener('scroll', closePop, { passive: true }); attachSwipe(sc); }
+  }
+  /* land the panchāng on the next upcoming festival, not January */
+  if (S.tab === 'panchang' && !S.reader) {
+    const el = $('#fest-next'), sc = $('#panchangScroll');
+    if (el && sc) sc.scrollTop = Math.max(0, el.offsetTop - sc.offsetTop - 52);
   }
 }
 
