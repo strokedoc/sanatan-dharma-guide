@@ -35,6 +35,7 @@ let S = {
   sec: 0,
   saved: readJSON('sd-saved', []),
   progress: readJSON('sd-progress', {}),
+  secs: readJSON('sd-secs', {}),        // last-open section per chapter, for resume
   font: Math.min(3, Math.max(0, parseInt(store.get('sd-font', '2'), 10) || 0)),
   query: '',
   part: null,        // library filtered to one part, opened from a home tile
@@ -205,12 +206,19 @@ function renderHome() {
         <div class="progress-track"><div class="progress-fill" style="width:${pct(cur.id)}%"></div></div>
       </button>
 
+      ${(() => {
+        /* rotate on the local date so the verse turns over at the user's midnight
+           (the day-change re-render above picks it up) */
+        const d = new Date();
+        const v = VERSES[(d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) % VERSES.length];
+        return `
       <div class="section-label" style="margin-top:22px">${t('VERSE OF THE DAY','આજનો શ્લોક')}</div>
       <div class="verse-card">
-        <div class="deva">एकं सत् विप्रा बहुधा वदन्ति</div>
-        <div class="txt">${t('Truth is one; the wise call it by many names.','સત્ય એક છે; જ્ઞાનીઓ તેને અનેક નામે કહે છે.')}</div>
-        <div class="cite">ṚGVEDA 1.164.46</div>
-      </div>
+        <div class="deva">${esc(v.deva)}</div>
+        <div class="txt">${esc(t(v.en, v.gu))}</div>
+        <div class="cite">${esc(v.cite)}</div>
+      </div>`;
+      })()}
 
       ${(() => {
         const next = FESTIVALS.filter(f => daysUntil(f) >= 0).slice(0, 3);
@@ -233,9 +241,34 @@ function renderHome() {
 }
 
 /* ═══════════ LIBRARY ═══════════ */
+/* full-text search: chapter content flattened to lowercase plain text, built
+   once per chapter+language and cached — title-only search missed anything
+   said inside a chapter */
+const FT_CACHE = new Map();
+function chFullText(c) {
+  const key = S.lang + ':' + c.id;
+  let txt = FT_CACHE.get(key);
+  if (txt === undefined) {
+    const parts = [];
+    chSecs(c).forEach(s => {
+      if (s.title) parts.push(s.title);
+      if (s.label) parts.push(s.label);
+      (s.blocks || []).forEach(b => {
+        if (b.title) parts.push(b.title);
+        if (b.eyebrow) parts.push(b.eyebrow);
+        if (b.html) parts.push(b.html);
+        if (b.cite) parts.push(b.cite);
+        (b.items || []).forEach(i => { parts.push(i.name); if (i.note) parts.push(i.note); });
+      });
+    });
+    txt = parts.join(' ').replace(/<[^>]+>/g, ' ').toLowerCase();
+    FT_CACHE.set(key, txt);
+  }
+  return txt;
+}
 function renderLibrary() {
   const q = S.query.trim().toLowerCase();
-  const match = c => !q || chTitle(c).toLowerCase().includes(q) || c.en_title.toLowerCase().includes(q) || (c.en_deva||'').toLowerCase().includes(q);
+  const match = c => !q || chTitle(c).toLowerCase().includes(q) || c.en_title.toLowerCase().includes(q) || (c.en_deva||'').toLowerCase().includes(q) || chFullText(c).includes(q);
   const row = c => `
     <button type="button" class="card clickable chapter-row" onclick="openReader('${c.id}')">
       <span class="num">${toRoman(c.n)}</span>
@@ -449,7 +482,7 @@ function renderReader() {
         onclick="${atFirst ? (prevCh ? `openReader('${prevCh.id}',-1)` : '') : 'goSection(' + (i - 1) + ')'}">${prevLabel}</button>
       <span class="pg-count">${i + 1} / ${secs.length}</span>
       <button class="pg next ${atLast ? 'chapter' : ''}"
-        onclick="${atLast ? (nextCh ? `openReader('${nextCh.id}')` : `setS({reader:null,sec:0})`) : 'goSection(' + (i + 1) + ')'}">${nextLabel}</button>
+        onclick="${atLast ? (nextCh ? `openReader('${nextCh.id}',0)` : `setS({reader:null,sec:0})`) : 'goSection(' + (i + 1) + ')'}">${nextLabel}</button>
     </div>
   </div>`;
 }
@@ -500,14 +533,23 @@ window.addEventListener('hashchange', () => {
 });
 
 /* ═══════════ actions ═══════════ */
-/* sec = -1 opens the chapter at its LAST subchapter (paging backwards) */
+/* sec = -1 opens the chapter at its LAST subchapter (paging backwards);
+   sec omitted resumes at the last-open section, like a bookmark left in place */
 function openReader(id, sec) {
   const c = chById(id);
   const total = ((S.lang === 'en' ? c.en : c.gu) || []).length;
-  const at = sec === -1 ? Math.max(0, total - 1) : (sec || 0);
+  const at = sec === -1 ? Math.max(0, total - 1)
+           : sec != null ? sec
+           : Math.min(S.secs[id] || 0, Math.max(0, total - 1));
   store.set('sd-lastread', id);
+  markSection(id, at);
   setS({ reader: id, sec: at, lastRead: id });
   markProgress(id, at, total);
+}
+
+function markSection(id, at) {
+  S.secs[id] = at;
+  store.set('sd-secs', JSON.stringify(S.secs));
 }
 
 /* swipe left/right in the reader turns pages like a book; mirrors the pager
@@ -518,7 +560,7 @@ function pageTurn(dir) {
   const secs = chSecs(c), i = S.sec, idx = chIndex(c.id);
   if (dir > 0) {
     if (i < secs.length - 1) goSection(i + 1);
-    else if (idx < CH.length - 1) openReader(CH[idx + 1].id);
+    else if (idx < CH.length - 1) openReader(CH[idx + 1].id, 0);  // fresh chapter starts at page 1
     else setS({ reader: null, sec: 0 });
   } else {
     if (i > 0) goSection(i - 1);
@@ -546,6 +588,7 @@ function goSection(n) {
   const c = chById(S.reader);
   const total = chSecs(c).length;
   const at = Math.max(0, Math.min(n, total - 1));
+  markSection(c.id, at);
   markProgress(c.id, at, total);
   setS({ sec: at });
   const sc = $('#readerScroll');
